@@ -35,6 +35,9 @@ metadata_fields = ["xesam:title", "xesam:artist"]
 # (char) : separator for metadata fields
 metadata_separator = "-"
 
+# (bool) : Hide text when no player is available? True disables the output for no players.
+hide_output = False
+
 # Defult initialization
 current_player = None
 player_names = None
@@ -155,9 +158,9 @@ def update_message():
 def scroll():
     global display_text, message_display_len, status_paused
     if not status_paused:
-        if len(display_text) > message_display_len:
+        if visual_len(display_text) > message_display_len:
             display_text = display_text[1:] + display_text[0]
-        elif len(display_text) < message_display_len:
+        elif visual_len(display_text) < message_display_len:
             display_text += " "*(message_display_len - len(display_text))
 
 def visual_len(text):
@@ -165,7 +168,7 @@ def visual_len(text):
     for ch in text:
         width = east_asian_width(ch)
         if width == 'W' or width == 'F':
-            visual_length += 1
+            visual_length += 2
         visual_length += 1
     return visual_length
 
@@ -190,6 +193,9 @@ def make_visual_len(text, visual_desired_length):
 
 def print_text():
     global display_text, message_display_len, players, player_names, display_prefix, display_suffix
+    if hide_output and len(players)==0:
+        print("", flush = True)
+        return
     scroll()
     print(display_prefix + " " +
         "%%{T%d}" % (font_index) +
